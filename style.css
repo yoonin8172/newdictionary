@@ -24,23 +24,57 @@ body {
 #home {
     height: 100vh;
     display: flex;
-    flex-direction: column;
     justify-content: center;
+    /* ✅ 전체 덩어리 가로 중앙 */
     align-items: center;
+    /* ✅ 전체 덩어리 세로 중앙 */
+}
+
+/* 타이틀+검색을 하나의 덩어리로 묶어서 중앙축 고정 */
+.home-inner {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* ✅ 타이틀&검색창 같은 축 */
+    text-align: center;
     gap: 16px;
 }
 
 #home h1 {
     font-size: 26px;
     font-weight: 400;
-    /* Regular */
-    margin: 0 0 12px 0;
+    margin: 0;
 }
 
-/* 검색 영역 */
+/* -------------------------
+   검색 박스 (검색창 + 연관검색어)
+------------------------- */
+
+.search-box {
+    width: 100%;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    /* ✅ home-inner가 이미 중앙정렬하므로 margin auto는 필수 아님.
+       남겨도 문제 없지만, 중앙축 흔들림 방지 위해 제거 */
+}
+
+/* 검색창 + 버튼 */
+.search-bar {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    /* ✅ 박스 폭에 맞춤 */
+    justify-content: flex-start;
+    /* ✅ input이 고정폭일 때도 중앙 */
+}
 
 #searchInput {
     width: 320px;
+    /* 네가 정해둔 폭 유지 */
     padding: 8px 10px;
     font-size: 14px;
     border: 1px solid #ccc;
@@ -54,32 +88,26 @@ body {
     background: #f5f5f5;
 }
 
-
 #searchBtn:active {
     background-color: #e0e0e0;
 }
 
-.search-bar {
-    display: flex;
-    gap: 6px;
+.searching {
+    opacity: 0.5;
 }
 
 /* 검색 결과 없음 메시지 */
-
 #searchStatus {
     min-height: 18px;
-    /* 항상 공간 확보 */
     margin-top: 8px;
     font-size: 13px;
     color: #666;
     visibility: hidden;
-    /* 안 보이지만 공간은 유지 */
+    /* 홈 중앙축은 home-inner가 잡고 있으니, 메시지도 그 흐름대로 */
 }
 
 
-.searching {
-    opacity: 0.5;
-}
+
 
 /* -------------------------
    결과 페이지
@@ -87,12 +115,9 @@ body {
 
 #result {
     padding: 32px 40px;
-    /* 기존 24px 32px */
 }
 
-
 /* 상단 단어 영역 */
-
 #result header {
     margin-bottom: 24px;
     display: flex;
@@ -138,30 +163,22 @@ body {
 .content {
     display: grid;
     grid-template-columns: 3fr 2fr;
-
     gap: 32px;
 }
 
 /* 좌측 정의 영역 */
-
 .definitions div {
     font-size: 15px;
-    /* 기존 14px → 15px */
     line-height: 1.8;
-    /* 읽기 전용 문서 느낌 */
     margin-bottom: 14px;
 }
 
-
 /* 우측 정의 추가 패널 */
-
 .add-panel {
     border-left: 1px solid #ddd;
     padding-left: 24px;
-    /* 기존 16px → 24px */
     padding-top: 8px;
 }
-
 
 #addBtn {
     font-size: 13px;
@@ -176,7 +193,6 @@ body {
 }
 
 /* 정의 추가 폼 */
-
 #addForm {
     margin-top: 16px;
 }
@@ -218,31 +234,22 @@ body {
     background-color: #ddd;
 }
 
-
 /* 정의 번호 */
-
 .index {
     display: inline-block;
     width: 18px;
-    /* 숫자 영역 고정 */
     margin-right: 6px;
     font-size: 11px;
-    /* 본문보다 작게 */
     color: #999;
-    /* 연한 회색 */
     text-align: right;
     vertical-align: top;
 }
 
-
 .definition-image {
     max-width: 320px;
     height: 180px;
-
     object-fit: contain;
-
     margin: 12px 0 12px 24px;
-    /* ← 텍스트 번호 시작선과 맞춤 */
 }
 
 .image-preview {
@@ -253,4 +260,84 @@ body {
     max-width: 120px;
     height: auto;
     display: block;
+}
+
+/* 검색 컴포넌트 전체 */
+.search-wrapper {
+    position: relative;
+    width: 360px;
+    /* input + 버튼 기준 */
+}
+
+/* 자동완성 리스트 */
+.suggestions {
+    position: absolute;
+    top: 100%;
+    /* 검색창 바로 아래 */
+    left: 0;
+    width: 100%;
+    margin-top: 6px;
+
+    list-style: none;
+    padding: 6px 0;
+    background: #fff;
+
+    font-size: 14px;
+    color: #555;
+
+    /* 사전 느낌 */
+    border-top: 1px solid #eee;
+}
+
+/* 자동완성 항목 */
+.suggestions li {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.suggestions li:hover {
+    background: #f5f5f5;
+}
+
+.suggestions li.active {
+    background: #eaeaea;
+}
+
+
+/* 검색 컴포넌트 중앙 고정 */
+.search-wrapper {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+#searchInput.preview {
+    color: #999;
+}
+
+/* -------------------------
+   Ghost Preview (자동완성 미리보기)
+------------------------- */
+
+.ghost-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 320px;
+    height: 32px;
+
+    padding: 8px 10px;
+    font-size: 14px;
+    line-height: 1.6;
+
+    color: #bbb;
+    pointer-events: none;
+
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#searchInput.hide-text {
+    color: transparent;
 }

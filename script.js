@@ -1,5 +1,5 @@
 /*************************************************
- * FIREBASE SETUP (CDN 방식)
+ * FIREBASE SETUP
  *************************************************/
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -38,7 +38,7 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 /*************************************************
- * DOM ELEMENTS (기존 이름 유지)
+ * DOM
  *************************************************/
 const homeSection = document.getElementById("home");
 const resultSection = document.getElementById("result");
@@ -46,6 +46,8 @@ const resultSection = document.getElementById("result");
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const searchStatus = document.getElementById("searchStatus");
+const suggestionList = document.getElementById("suggestionList");
+const ghostText = document.getElementById("ghostText");
 
 const wordTitle = document.getElementById("wordTitle");
 const definitionList = document.getElementById("definitionList");
@@ -56,7 +58,6 @@ const definitionInput = document.getElementById("definitionInput");
 const saveBtn = document.getElementById("saveBtn");
 
 const homeBtn = document.getElementById("homeBtn");
-const searchBar = document.querySelector(".search-bar");
 
 const imageInput = document.getElementById("imageInput");
 const clipBtn = document.querySelector(".clip");
@@ -67,8 +68,20 @@ const imagePreview = document.getElementById("imagePreview");
  *************************************************/
 let selectedImageFile = null;
 
+let currentSuggestions = [];
+let currentSuggestionIndex = -1;
+let originalInputValue = "";
+
 /*************************************************
- * UI HELPERS
+ * DEMO SUGGESTIONS
+ *************************************************/
+const demoSuggestions = {
+    "사": ["사과", "사과하다", "사랑", "사용하다", "사자"],
+    "가": ["가다", "가방", "가볍다", "가지", "가끔"]
+};
+
+/*************************************************
+ * HELPERS
  *************************************************/
 function showSearchStatus(msg) {
     searchStatus.textContent = msg;
@@ -81,56 +94,44 @@ function hideSearchStatus() {
 }
 
 /*************************************************
- * FIRESTORE: 단어 존재 여부 확인
+ * FIRESTORE
  *************************************************/
 async function wordExists(word) {
-    const wordRef = doc(db, "words", word);
-    const snap = await getDoc(wordRef);
+    const snap = await getDoc(doc(db, "words", word));
     return snap.exists();
 }
 
-/*************************************************
- * FIRESTORE: 정의 불러오기
- *************************************************/
 async function loadEntries(word) {
-    const entriesRef = collection(db, "words", word, "entries");
-    const q = query(entriesRef, orderBy("createdAt", "asc"));
+    const q = query(
+        collection(db, "words", word, "entries"),
+        orderBy("createdAt", "asc")
+    );
     const snap = await getDocs(q);
     return snap.docs.map(d => d.data());
 }
 
-/*************************************************
- * FIRESTORE: 텍스트 정의 저장
- *************************************************/
 async function addTextEntry(word, text) {
-    const entriesRef = collection(db, "words", word, "entries");
-    await addDoc(entriesRef, {
+    await addDoc(collection(db, "words", word, "entries"), {
         type: "text",
         content: text,
         createdAt: serverTimestamp()
     });
 }
 
-/*************************************************
- * STORAGE + FIRESTORE: 이미지 정의 저장
- *************************************************/
 async function addImageEntry(word, file) {
-    const filename = `${Date.now()}_${file.name}`;
-    const imageRef = ref(storage, `words/${word}/${filename}`);
-
+    const imageRef = ref(storage, `words/${word}/${Date.now()}_${file.name}`);
     await uploadBytes(imageRef, file);
-    const imageURL = await getDownloadURL(imageRef);
+    const url = await getDownloadURL(imageRef);
 
-    const entriesRef = collection(db, "words", word, "entries");
-    await addDoc(entriesRef, {
+    await addDoc(collection(db, "words", word, "entries"), {
         type: "image",
-        content: imageURL,
+        content: url,
         createdAt: serverTimestamp()
     });
 }
 
 /*************************************************
- * SEARCH ACTION
+ * SEARCH
  *************************************************/
 searchBtn.addEventListener("click", async () => {
     const word = searchInput.value.trim();
@@ -143,24 +144,11 @@ searchBtn.addEventListener("click", async () => {
     }
 
     hideSearchStatus();
-    await showResultPage(word);
+    showResultPage(word);
 });
 
 /*************************************************
- * ENTER KEY SEARCH
- *************************************************/
-searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        searchBar.classList.add("searching");
-        setTimeout(() => {
-            searchBar.classList.remove("searching");
-            searchBtn.click();
-        }, 120);
-    }
-});
-
-/*************************************************
- * SHOW RESULT PAGE
+ * RESULT PAGE
  *************************************************/
 async function showResultPage(word) {
     homeSection.style.display = "none";
@@ -169,17 +157,18 @@ async function showResultPage(word) {
     wordTitle.textContent = word;
     addForm.style.display = "none";
 
-    const entries = await loadEntries(word);
-    renderDefinitions(entries);
+    suggestionList.innerHTML = "";
+    suggestionList.style.display = "none";
+    ghostText.textContent = "";
+    searchInput.classList.remove("hide-text");
+
+    renderDefinitions(await loadEntries(word));
 }
 
-/*************************************************
- * RENDER DEFINITIONS (텍스트 + 이미지)
- *************************************************/
 function renderDefinitions(entries) {
     definitionList.innerHTML = "";
-
     let index = 1;
+
     entries.forEach(item => {
         if (item.type === "text") {
             const div = document.createElement("div");
@@ -191,24 +180,31 @@ function renderDefinitions(entries) {
         if (item.type === "image") {
             const img = document.createElement("img");
             img.src = item.content;
-            img.classList.add("definition-image");
+            img.className = "definition-image";
             definitionList.appendChild(img);
         }
     });
 }
 
 /*************************************************
- * TOGGLE ADD FORM
+ * ADD FORM TOGGLE
  *************************************************/
 addBtn.addEventListener("click", () => {
-    addForm.style.display =
-        addForm.style.display === "none" ? "block" : "none";
+    const isOpen = addForm.style.display === "block";
+
+    if (isOpen) {
+        addForm.style.display = "none";
+        return;
+    }
+
+    addForm.style.display = "block";
+    definitionInput.focus();
 });
 
 /*************************************************
- * IMAGE SELECT → PREVIEW ONLY
+ * IMAGE
  *************************************************/
-clipBtn.addEventListener("click", (e) => {
+clipBtn.addEventListener("click", e => {
     e.preventDefault();
     imageInput.click();
 });
@@ -218,17 +214,12 @@ imageInput.addEventListener("change", () => {
     if (!file) return;
 
     selectedImageFile = file;
-
-    imagePreview.innerHTML = "";
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-
-    imagePreview.appendChild(img);
+    imagePreview.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
     imagePreview.style.display = "block";
 });
 
 /*************************************************
- * SAVE (TEXT + IMAGE)
+ * SAVE
  *************************************************/
 saveBtn.addEventListener("click", async () => {
     const text = definitionInput.value.trim();
@@ -236,34 +227,137 @@ saveBtn.addEventListener("click", async () => {
 
     if (!text && !selectedImageFile) return;
 
-    if (text) {
-        await addTextEntry(word, text);
-    }
-
+    if (text) await addTextEntry(word, text);
     if (selectedImageFile) {
         await addImageEntry(word, selectedImageFile);
         selectedImageFile = null;
     }
 
-    // 초기화
     definitionInput.value = "";
     imageInput.value = "";
     imagePreview.innerHTML = "";
     imagePreview.style.display = "none";
-
     addForm.style.display = "none";
 
-    const entries = await loadEntries(word);
-    renderDefinitions(entries);
+    renderDefinitions(await loadEntries(word));
 });
 
 /*************************************************
- * HOME BUTTON
+ * HOME
  *************************************************/
 homeBtn.addEventListener("click", () => {
     resultSection.style.display = "none";
     homeSection.style.display = "flex";
 
     searchInput.value = "";
+    ghostText.textContent = "";
+    searchInput.classList.remove("hide-text");
     hideSearchStatus();
+});
+
+/*************************************************
+ * SUGGESTIONS
+ *************************************************/
+function renderSuggestions(list) {
+    suggestionList.innerHTML = "";
+    currentSuggestions = list;
+    currentSuggestionIndex = -1;
+
+    list.forEach((word, index) => {
+        const li = document.createElement("li");
+        li.textContent = word;
+
+        li.addEventListener("click", () => selectSuggestion(index));
+        suggestionList.appendChild(li);
+    });
+
+    suggestionList.style.display = "block";
+}
+
+function updateSuggestionHighlight() {
+    const items = suggestionList.querySelectorAll("li");
+
+    items.forEach((li, i) => {
+        li.classList.toggle("active", i === currentSuggestionIndex);
+    });
+
+    if (currentSuggestionIndex >= 0) {
+        const suggestion = currentSuggestions[currentSuggestionIndex];
+        const inputValue = originalInputValue;
+
+        searchInput.classList.add("hide-text");
+
+        if (suggestion.startsWith(inputValue)) {
+            ghostText.textContent =
+                inputValue + suggestion.slice(inputValue.length);
+        } else {
+            ghostText.textContent = suggestion;
+        }
+    } else {
+        ghostText.textContent = "";
+        searchInput.classList.remove("hide-text");
+    }
+}
+
+function selectSuggestion(index) {
+    searchInput.value = currentSuggestions[index];
+    ghostText.textContent = "";
+    searchInput.classList.remove("hide-text");
+
+    suggestionList.innerHTML = "";
+    suggestionList.style.display = "none";
+    searchBtn.click();
+}
+
+/*************************************************
+ * INPUT + KEYBOARD
+ *************************************************/
+searchInput.addEventListener("input", () => {
+    originalInputValue = searchInput.value;
+    ghostText.textContent = "";
+    searchInput.classList.remove("hide-text");
+
+    suggestionList.innerHTML = "";
+    suggestionList.style.display = "none";
+    currentSuggestions = [];
+    currentSuggestionIndex = -1;
+
+    if (searchInput.value.length !== 1) return;
+
+    const list = demoSuggestions[searchInput.value];
+    if (!list) return;
+
+    renderSuggestions(list);
+});
+
+searchInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+
+        if (currentSuggestionIndex >= 0) {
+            selectSuggestion(currentSuggestionIndex);
+        } else {
+            searchBtn.click();
+        }
+        return;
+    }
+
+    if (currentSuggestions.length > 0) {
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            currentSuggestionIndex =
+                (currentSuggestionIndex + 1) % currentSuggestions.length;
+            updateSuggestionHighlight();
+            return;
+        }
+
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            currentSuggestionIndex =
+                (currentSuggestionIndex - 1 + currentSuggestions.length) %
+                currentSuggestions.length;
+            updateSuggestionHighlight();
+            return;
+        }
+    }
 });

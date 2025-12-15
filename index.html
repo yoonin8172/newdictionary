@@ -11,18 +11,26 @@
 
     <!-- 오프닝 페이지 -->
     <section id="home">
-        <h1>사전</h1>
+        <div class="home-inner">
+            <h1>사전</h1>
 
-        <!-- 검색창 + 버튼을 한 줄로 -->
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="단어를 입력하세요" />
-            <button id="searchBtn" aria-label="검색">🔍</button>
+            <div class="search-box">
+                <div class="search-wrapper">
 
+                    <!-- 🔥 ghost preview (자동완성 미리보기용) -->
+                    <div id="ghostText" class="ghost-text"></div>
+
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="단어를 입력하세요" />
+                        <button id="searchBtn" aria-label="검색">🔍</button>
+                    </div>
+
+                    <ul id="suggestionList" class="suggestions"></ul>
+                </div>
+
+                <p id="searchStatus"></p>
+            </div>
         </div>
-
-        <!-- 검색 상태 메시지 -->
-        <p id="searchStatus"></p>
-
     </section>
 
     <!-- 검색 결과 페이지 -->
@@ -32,17 +40,13 @@
 
             <div class="title-block">
                 <h2 id="wordTitle"></h2>
-                <div class="meta">품사 · 발음</div>
+                <div class="meta"> 품사 · 발음</div>
             </div>
         </header>
 
         <div class="content">
-            <!-- 좌측: 정의 리스트 -->
-            <div class="definitions" id="definitionList">
-                <!-- JS로 채워짐 -->
-            </div>
+            <div class="definitions" id="definitionList"></div>
 
-            <!-- 우측: 정의 추가 -->
             <div class="add-panel">
                 <button id="addBtn">정의 추가</button>
 
@@ -52,10 +56,9 @@
 
                     <label>첨부:</label>
                     <button class="clip">📎</button>
+
                     <div id="imagePreview" class="image-preview" style="display:none;"></div>
-
                     <input type="file" id="imageInput" accept="image/*" style="display:none;">
-
 
                     <button id="saveBtn">저장</button>
                 </div>
@@ -64,7 +67,6 @@
     </section>
 
     <script type="module" src="script.js"></script>
-
 </body>
 
 </html>
