@@ -60,7 +60,8 @@ const saveBtn = document.getElementById("saveBtn");
 const homeBtn = document.getElementById("homeBtn");
 
 const imageInput = document.getElementById("imageInput");
-const clipBtn = document.querySelector(".clip");
+const clipBtn = document.querySelector(".attach-btn");
+
 const imagePreview = document.getElementById("imagePreview");
 
 /*************************************************
@@ -154,7 +155,11 @@ async function showResultPage(word) {
     homeSection.style.display = "none";
     resultSection.style.display = "block";
 
-    wordTitle.textContent = word;
+    wordTitle.innerHTML = `
+  <span class="word-text">${word}</span>
+  <span class="word-stars">★★</span>
+`;
+
     addForm.style.display = "none";
 
     suggestionList.innerHTML = "";

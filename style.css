@@ -12,7 +12,7 @@ body {
     font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", Arial, sans-serif;
     color: #111;
-    background-color: #fff;
+    background-color: #f8f8f5;
     font-size: 14px;
     line-height: 1.6;
 }
@@ -25,19 +25,15 @@ body {
     height: 100vh;
     display: flex;
     justify-content: center;
-    /* ✅ 전체 덩어리 가로 중앙 */
     align-items: center;
-    /* ✅ 전체 덩어리 세로 중앙 */
 }
 
-/* 타이틀+검색을 하나의 덩어리로 묶어서 중앙축 고정 */
 .home-inner {
     width: 100%;
     max-width: 640px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* ✅ 타이틀&검색창 같은 축 */
     text-align: center;
     gap: 16px;
 }
@@ -49,75 +45,72 @@ body {
 }
 
 /* -------------------------
-   검색 박스 (검색창 + 연관검색어)
+   검색 박스
 ------------------------- */
 
 .search-box {
     width: 100%;
     max-width: 600px;
-    background: #fff;
+    background-color: #f8f8f5;
     border-radius: 12px;
     padding: 16px;
-    /* ✅ home-inner가 이미 중앙정렬하므로 margin auto는 필수 아님.
-       남겨도 문제 없지만, 중앙축 흔들림 방지 위해 제거 */
 }
 
-/* 검색창 + 버튼 */
 .search-bar {
     display: flex;
+    align-items: center;
     gap: 6px;
-    width: 100%;
-    /* ✅ 박스 폭에 맞춤 */
-    justify-content: flex-start;
-    /* ✅ input이 고정폭일 때도 중앙 */
 }
 
 #searchInput {
     width: 320px;
-    /* 네가 정해둔 폭 유지 */
     padding: 8px 10px;
     font-size: 14px;
     border: 1px solid #ccc;
+    background: #fff;
 }
 
 #searchBtn {
     width: 32px;
     height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     font-size: 14px;
-    border: 1px solid #999;
-    background: #f5f5f5;
+    border: 1px solid #ccc;
+    background-color: #f6f6f2;
+}
+
+#searchBtn:hover {
+    background-color: #f0f0eb;
+}
+
+#searchBtn svg {
+    pointer-events: none;
 }
 
 #searchBtn:active {
-    background-color: #e0e0e0;
+    background-color: #e6e6e0;
 }
 
-.searching {
-    opacity: 0.5;
-}
-
-/* 검색 결과 없음 메시지 */
 #searchStatus {
     min-height: 18px;
     margin-top: 8px;
     font-size: 13px;
     color: #666;
     visibility: hidden;
-    /* 홈 중앙축은 home-inner가 잡고 있으니, 메시지도 그 흐름대로 */
 }
-
-
-
 
 /* -------------------------
    결과 페이지
 ------------------------- */
 
 #result {
-    padding: 32px 40px;
+    padding: 40px 48px;
 }
 
-/* 상단 단어 영역 */
 #result header {
     margin-bottom: 24px;
     display: flex;
@@ -125,18 +118,41 @@ body {
     gap: 12px;
 }
 
+/* 정의 번호 – 각주처럼 */
+.index {
+    display: inline-block;
+    width: 14px;
+    margin-right: 6px;
+    font-size: 11px;
+    color: #aaa;
+    text-align: right;
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+/* 홈 버튼 */
 #homeBtn {
     width: 28px;
     height: 28px;
-    border: 1px solid #aaa;
-    background: #f8f8f8;
-    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #ddd;
+    background: #fff;
+
     font-size: 14px;
-    line-height: 1;
+    color: #555;
+
+    cursor: pointer;
+    position: relative;
+    top: 28px;
 }
 
-#homeBtn:active {
-    background: #e6e6e6;
+#homeBtn:hover {
+    border-color: #bbb;
+    color: #111;
 }
 
 .title-block {
@@ -144,10 +160,20 @@ body {
     flex-direction: column;
 }
 
+/* 단어 타이틀 */
 #wordTitle {
-    font-size: 18px;
-    font-weight: 400;
-    margin: 0;
+    font-size: 25px;
+    font-weight: 600;
+    color: #2a5fe4;
+}
+
+/* 별 */
+.word-stars {
+    margin-left: 6px;
+    font-size: 14px;
+    color: #f35a48;
+    vertical-align: middle;
+    letter-spacing: 1px;
 }
 
 .meta {
@@ -166,84 +192,91 @@ body {
     gap: 32px;
 }
 
-/* 좌측 정의 영역 */
 .definitions div {
     font-size: 15px;
-    line-height: 1.8;
+    line-height: 1.9;
     margin-bottom: 14px;
 }
 
-/* 우측 정의 추가 패널 */
+/* -------------------------
+   정의 추가 패널
+------------------------- */
+
 .add-panel {
-    border-left: 1px solid #ddd;
-    padding-left: 24px;
+    border-left: 1px solid #e0e0e0;
+    padding-left: 28px;
     padding-top: 8px;
 }
 
-#addBtn {
+/* 정의 추가 / 사진 넣기 버튼 */
+#addBtn,
+.attach-btn {
     font-size: 13px;
     padding: 6px 10px;
-    border: 1px solid #aaa;
-    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    background-color: #f6f6f2;
+    color: #111;
     cursor: pointer;
+    text-align: left;
 }
 
-#addBtn:active {
-    background-color: #e6e6e6;
+#addBtn:hover,
+.attach-btn:hover {
+    background-color: #f0f0eb;
+    border-color: #999;
 }
 
-/* 정의 추가 폼 */
+#addBtn:active,
+.attach-btn:active {
+    background-color: #e6e6e0;
+}
+
 #addForm {
-    margin-top: 16px;
+    margin-top: 20px;
 }
 
-#addForm label {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 4px;
-}
-
+/* 정의 입력 */
 #definitionInput {
     width: 100%;
-    height: 110px;
-    padding: 6px;
-    font-size: 13px;
+    height: 120px;
+    padding: 10px;
+    font-size: 14px;
     border: 1px solid #ccc;
-    margin-bottom: 8px;
+    background: #fff;
+    margin-top: 6px;
 }
 
-.clip {
-    font-size: 12px;
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    background-color: #fafafa;
-    cursor: default;
-    margin-right: 6px;
+/* 사진 넣기 버튼 */
+.attach-btn {
+    display: block;
+    margin-top: 18px;
 }
+
+/* -------------------------
+   저장 버튼 (보조)
+------------------------- */
 
 #saveBtn {
-    margin-top: 8px;
+    display: block;
+    margin-top: 14px;
+    padding: 6px 12px;
     font-size: 12px;
-    padding: 6px 10px;
-    border: 1px solid #888;
-    background-color: #f0f0f0;
+
+    background-color: #f8f8f5;
+    border: 1px solid #ddd;
+    color: #666;
+
     cursor: pointer;
+    text-align: left;
 }
 
-#saveBtn:active {
-    background-color: #ddd;
+#saveBtn:hover {
+    background-color: #f2f2ee;
 }
 
-/* 정의 번호 */
-.index {
-    display: inline-block;
-    width: 18px;
-    margin-right: 6px;
-    font-size: 11px;
-    color: #999;
-    text-align: right;
-    vertical-align: top;
-}
+/* -------------------------
+   이미지
+------------------------- */
 
 .definition-image {
     max-width: 320px;
@@ -253,89 +286,61 @@ body {
 }
 
 .image-preview {
-    margin: 10px 0;
+    margin: 12px 0;
 }
 
 .image-preview img {
     max-width: 120px;
-    height: auto;
     display: block;
 }
 
-/* 검색 컴포넌트 전체 */
+/* -------------------------
+   검색 자동완성
+------------------------- */
+
 .search-wrapper {
     position: relative;
     width: 360px;
-    /* input + 버튼 기준 */
+    margin: 0 auto;
+    text-align: left;
 }
 
-/* 자동완성 리스트 */
 .suggestions {
     position: absolute;
     top: 100%;
-    /* 검색창 바로 아래 */
     left: 0;
     width: 100%;
     margin-top: 6px;
-
     list-style: none;
     padding: 6px 0;
     background: #fff;
-
-    font-size: 14px;
-    color: #555;
-
-    /* 사전 느낌 */
     border-top: 1px solid #eee;
 }
 
-/* 자동완성 항목 */
 .suggestions li {
     padding: 6px 10px;
     cursor: pointer;
 }
 
-.suggestions li:hover {
-    background: #f5f5f5;
-}
-
 .suggestions li.active {
-    background: #eaeaea;
-}
-
-
-/* 검색 컴포넌트 중앙 고정 */
-.search-wrapper {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: left;
-}
-
-#searchInput.preview {
-    color: #999;
+    background: #f0f2f5;
 }
 
 /* -------------------------
-   Ghost Preview (자동완성 미리보기)
+   Ghost Preview
 ------------------------- */
 
 .ghost-text {
     position: absolute;
     top: 0;
     left: 0;
-
     width: 320px;
     height: 32px;
-
     padding: 8px 10px;
     font-size: 14px;
-    line-height: 1.6;
-
-    color: #bbb;
+    color: #a0a0a0;
     pointer-events: none;
-
     white-space: nowrap;
-    overflow: hidden;
 }
 
 #searchInput.hide-text {

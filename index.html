@@ -12,7 +12,7 @@
     <!-- 오프닝 페이지 -->
     <section id="home">
         <div class="home-inner">
-            <h1>사전</h1>
+            <h1>우리말 사전</h1>
 
             <div class="search-box">
                 <div class="search-wrapper">
@@ -22,7 +22,13 @@
 
                     <div class="search-bar">
                         <input type="text" id="searchInput" placeholder="단어를 입력하세요" />
-                        <button id="searchBtn" aria-label="검색">🔍</button>
+                        <button id="searchBtn" aria-label="검색">
+                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+                                <line x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                        </button>
+
                     </div>
 
                     <ul id="suggestionList" class="suggestions"></ul>
@@ -40,7 +46,7 @@
 
             <div class="title-block">
                 <h2 id="wordTitle"></h2>
-                <div class="meta"> 품사 · 발음</div>
+                <div class="meta"> 의미 · 쓰임</div>
             </div>
         </header>
 
@@ -48,19 +54,18 @@
             <div class="definitions" id="definitionList"></div>
 
             <div class="add-panel">
-                <button id="addBtn">정의 추가</button>
+                <button id="addBtn">단어 정의 추가</button>
 
                 <div id="addForm" style="display:none;">
-                    <label>정의:</label>
+
                     <textarea id="definitionInput"></textarea>
 
-                    <label>첨부:</label>
-                    <button class="clip">📎</button>
+                    <button class="attach-btn">🖼️ 사진 넣기 </button>
 
                     <div id="imagePreview" class="image-preview" style="display:none;"></div>
                     <input type="file" id="imageInput" accept="image/*" style="display:none;">
 
-                    <button id="saveBtn">저장</button>
+                    <button id="saveBtn">저장하기</button>
                 </div>
             </div>
         </div>
