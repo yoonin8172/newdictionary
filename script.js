@@ -216,25 +216,30 @@ imageInput.addEventListener("change", () => {
     imagePreview.style.display = "block";
 });
 
+
 /*************************************************
  * SAVE
  *************************************************/
+let isSaving = false; // 🔒 저장 상태 플래그
+
 saveBtn.addEventListener("click", async () => {
+    if (isSaving) return; // ⛔ 중복 클릭 방지
+    isSaving = true;
+
     const text = definitionInput.value.trim();
     const word = document.querySelector(".word-text").textContent;
 
-    if (!text && !selectedImageFile) return;
+    if (!text && !selectedImageFile) {
+        isSaving = false;
+        return;
+    }
 
-    // 🔹 저장 시작
     const startTime = Date.now();
-    const MIN_LOADING_TIME = 400; // 0.4초
+    const MIN_LOADING_TIME = 400;
 
-    // 버튼 상태 변경
-    saveBtn.disabled = true;
     const originalText = saveBtn.textContent;
     saveBtn.textContent = "저장 중...";
-    saveBtn.focus(); // 🔥 클릭 피드백 고정
-
+    saveBtn.disabled = true;
 
     try {
         if (text) await addTextEntry(word, text);
@@ -243,7 +248,6 @@ saveBtn.addEventListener("click", async () => {
             selectedImageFile = null;
         }
 
-        // 🔹 최소 로딩 시간 보장
         const elapsed = Date.now() - startTime;
         if (elapsed < MIN_LOADING_TIME) {
             await new Promise(resolve =>
@@ -251,7 +255,6 @@ saveBtn.addEventListener("click", async () => {
             );
         }
 
-        // 입력 초기화
         definitionInput.value = "";
         imageInput.value = "";
         imagePreview.innerHTML = "";
@@ -261,9 +264,9 @@ saveBtn.addEventListener("click", async () => {
         renderDefinitions(await loadEntries(word));
 
     } finally {
-        // 버튼 복구
-        saveBtn.disabled = false;
         saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+        isSaving = false; // 🔓 저장 종료
     }
 });
 
