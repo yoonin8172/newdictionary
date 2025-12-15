@@ -233,3 +233,24 @@ body {
     text-align: right;
     vertical-align: top;
 }
+
+
+.definition-image {
+    max-width: 320px;
+    height: 180px;
+
+    object-fit: contain;
+
+    margin: 12px 0 12px 24px;
+    /* ← 텍스트 번호 시작선과 맞춤 */
+}
+
+.image-preview {
+    margin: 10px 0;
+}
+
+.image-preview img {
+    max-width: 120px;
+    height: auto;
+    display: block;
+}

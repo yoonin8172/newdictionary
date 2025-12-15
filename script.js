@@ -1,24 +1,45 @@
 /*************************************************
- * DEMO DICTIONARY DATA
- * (기존에 존재하는 단어만 다룸)
+ * FIREBASE SETUP (CDN 방식)
  *************************************************/
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const dictionaryData = {
-    "밤": [
-        { type: "text", content: "해가 진 뒤부터 해가 뜨기 전까지의 시간." },
-        { type: "text", content: "생각이 많아지는 시간대." },
-        { type: "image", content: "https://via.placeholder.com/300x180?text=night" }
-    ],
-    "사전": [
-        { type: "text", content: "단어의 뜻을 풀이해 놓은 책." },
-        { type: "text", content: "완성된 의미를 제공한다고 믿게 만드는 형식." }
-    ]
-};
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 /*************************************************
- * DOM ELEMENTS
+ * FIREBASE CONFIG
  *************************************************/
+const firebaseConfig = {
+    apiKey: "AIzaSyBqFP3Bv8A4IalV5xEAPktSwbB8ezEPLOw",
+    authDomain: "dictonary-ae651.firebaseapp.com",
+    projectId: "dictonary-ae651",
+    storageBucket: "dictonary-ae651.firebasestorage.app",
+    messagingSenderId: "239536622728",
+    appId: "1:239536622728:web:5960210cbd8d8eba4fa33d"
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+/*************************************************
+ * DOM ELEMENTS (기존 이름 유지)
+ *************************************************/
 const homeSection = document.getElementById("home");
 const resultSection = document.getElementById("result");
 
@@ -35,42 +56,104 @@ const definitionInput = document.getElementById("definitionInput");
 const saveBtn = document.getElementById("saveBtn");
 
 const homeBtn = document.getElementById("homeBtn");
+const searchBar = document.querySelector(".search-bar");
+
+const imageInput = document.getElementById("imageInput");
+const clipBtn = document.querySelector(".clip");
+const imagePreview = document.getElementById("imagePreview");
+
+/*************************************************
+ * STATE
+ *************************************************/
+let selectedImageFile = null;
+
+/*************************************************
+ * UI HELPERS
+ *************************************************/
+function showSearchStatus(msg) {
+    searchStatus.textContent = msg;
+    searchStatus.style.visibility = "visible";
+}
+
+function hideSearchStatus() {
+    searchStatus.textContent = "";
+    searchStatus.style.visibility = "hidden";
+}
+
+/*************************************************
+ * FIRESTORE: 단어 존재 여부 확인
+ *************************************************/
+async function wordExists(word) {
+    const wordRef = doc(db, "words", word);
+    const snap = await getDoc(wordRef);
+    return snap.exists();
+}
+
+/*************************************************
+ * FIRESTORE: 정의 불러오기
+ *************************************************/
+async function loadEntries(word) {
+    const entriesRef = collection(db, "words", word, "entries");
+    const q = query(entriesRef, orderBy("createdAt", "asc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+}
+
+/*************************************************
+ * FIRESTORE: 텍스트 정의 저장
+ *************************************************/
+async function addTextEntry(word, text) {
+    const entriesRef = collection(db, "words", word, "entries");
+    await addDoc(entriesRef, {
+        type: "text",
+        content: text,
+        createdAt: serverTimestamp()
+    });
+}
+
+/*************************************************
+ * STORAGE + FIRESTORE: 이미지 정의 저장
+ *************************************************/
+async function addImageEntry(word, file) {
+    const filename = `${Date.now()}_${file.name}`;
+    const imageRef = ref(storage, `words/${word}/${filename}`);
+
+    await uploadBytes(imageRef, file);
+    const imageURL = await getDownloadURL(imageRef);
+
+    const entriesRef = collection(db, "words", word, "entries");
+    await addDoc(entriesRef, {
+        type: "image",
+        content: imageURL,
+        createdAt: serverTimestamp()
+    });
+}
 
 /*************************************************
  * SEARCH ACTION
  *************************************************/
-
-searchBtn.addEventListener("click", () => {
+searchBtn.addEventListener("click", async () => {
     const word = searchInput.value.trim();
     if (!word) return;
 
-    // 사전에 없는 단어
-    if (!dictionaryData[word]) {
-        searchStatus.textContent = "사전에 등록되지 않은 단어입니다.";
-        searchStatus.style.visibility = "visible";
-
+    const exists = await wordExists(word);
+    if (!exists) {
+        showSearchStatus("사전에 등록되지 않은 단어입니다.");
         return;
     }
 
-    // 검색 성공
-    searchStatus.style.visibility = "hidden";
-
-    showResultPage(word);
+    hideSearchStatus();
+    await showResultPage(word);
 });
 
 /*************************************************
- * ENTER KEY SEARCH (with subtle feedback)
+ * ENTER KEY SEARCH
  *************************************************/
-
 searchInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-        const bar = document.querySelector(".search-bar");
-
-        // 아주 잠깐 눌린 느낌
-        bar.classList.add("searching");
-
+        searchBar.classList.add("searching");
         setTimeout(() => {
-            bar.classList.remove("searching");
+            searchBar.classList.remove("searching");
             searchBtn.click();
         }, 120);
     }
@@ -79,40 +162,36 @@ searchInput.addEventListener("keydown", (e) => {
 /*************************************************
  * SHOW RESULT PAGE
  *************************************************/
-
-function showResultPage(word) {
+async function showResultPage(word) {
     homeSection.style.display = "none";
     resultSection.style.display = "block";
 
     wordTitle.textContent = word;
-
-    renderDefinitions(word);
-
-    // 정의 추가 폼은 항상 닫힌 상태
     addForm.style.display = "none";
+
+    const entries = await loadEntries(word);
+    renderDefinitions(entries);
 }
 
 /*************************************************
- * RENDER DEFINITIONS
+ * RENDER DEFINITIONS (텍스트 + 이미지)
  *************************************************/
-
-function renderDefinitions(word) {
+function renderDefinitions(entries) {
     definitionList.innerHTML = "";
 
-    const items = dictionaryData[word];
-
-    items.forEach((item, index) => {
+    let index = 1;
+    entries.forEach(item => {
         if (item.type === "text") {
             const div = document.createElement("div");
-            div.innerHTML = `<span class="index">${index + 1}</span> ${item.content}`;
+            div.innerHTML = `<span class="index">${index}</span> ${item.content}`;
             definitionList.appendChild(div);
+            index++;
         }
 
         if (item.type === "image") {
             const img = document.createElement("img");
             img.src = item.content;
-            img.style.maxWidth = "100%";
-            img.style.margin = "12px 0";
+            img.classList.add("definition-image");
             definitionList.appendChild(img);
         }
     });
@@ -121,41 +200,70 @@ function renderDefinitions(word) {
 /*************************************************
  * TOGGLE ADD FORM
  *************************************************/
-
 addBtn.addEventListener("click", () => {
     addForm.style.display =
         addForm.style.display === "none" ? "block" : "none";
 });
 
 /*************************************************
- * SAVE NEW DEFINITION
+ * IMAGE SELECT → PREVIEW ONLY
  *************************************************/
+clipBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    imageInput.click();
+});
 
-saveBtn.addEventListener("click", () => {
-    const text = definitionInput.value.trim();
-    if (!text) return;
+imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (!file) return;
 
-    const word = wordTitle.textContent;
+    selectedImageFile = file;
 
-    dictionaryData[word].push({
-        type: "text",
-        content: text
-    });
+    imagePreview.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
 
-    definitionInput.value = "";
-    addForm.style.display = "none";
-
-    renderDefinitions(word);
+    imagePreview.appendChild(img);
+    imagePreview.style.display = "block";
 });
 
 /*************************************************
- * HOME BUTTON ACTION
+ * SAVE (TEXT + IMAGE)
  *************************************************/
+saveBtn.addEventListener("click", async () => {
+    const text = definitionInput.value.trim();
+    const word = wordTitle.textContent;
 
+    if (!text && !selectedImageFile) return;
+
+    if (text) {
+        await addTextEntry(word, text);
+    }
+
+    if (selectedImageFile) {
+        await addImageEntry(word, selectedImageFile);
+        selectedImageFile = null;
+    }
+
+    // 초기화
+    definitionInput.value = "";
+    imageInput.value = "";
+    imagePreview.innerHTML = "";
+    imagePreview.style.display = "none";
+
+    addForm.style.display = "none";
+
+    const entries = await loadEntries(word);
+    renderDefinitions(entries);
+});
+
+/*************************************************
+ * HOME BUTTON
+ *************************************************/
 homeBtn.addEventListener("click", () => {
     resultSection.style.display = "none";
     homeSection.style.display = "flex";
 
     searchInput.value = "";
-    searchStatus.style.display = "none";
+    hideSearchStatus();
 });
