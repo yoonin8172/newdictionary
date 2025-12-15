@@ -217,18 +217,24 @@ imageInput.addEventListener("change", () => {
 });
 
 /*************************************************
- * SAVE (저장 중 UX 추가)
+ * SAVE
  *************************************************/
 saveBtn.addEventListener("click", async () => {
     const text = definitionInput.value.trim();
     const word = document.querySelector(".word-text").textContent;
 
     if (!text && !selectedImageFile) return;
-    if (saveBtn.disabled) return;
 
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = "저장 중…";
+    // 🔹 저장 시작
+    const startTime = Date.now();
+    const MIN_LOADING_TIME = 400; // 0.4초
+
+    // 버튼 상태 변경
     saveBtn.disabled = true;
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = "저장 중...";
+    saveBtn.focus(); // 🔥 클릭 피드백 고정
+
 
     try {
         if (text) await addTextEntry(word, text);
@@ -237,6 +243,15 @@ saveBtn.addEventListener("click", async () => {
             selectedImageFile = null;
         }
 
+        // 🔹 최소 로딩 시간 보장
+        const elapsed = Date.now() - startTime;
+        if (elapsed < MIN_LOADING_TIME) {
+            await new Promise(resolve =>
+                setTimeout(resolve, MIN_LOADING_TIME - elapsed)
+            );
+        }
+
+        // 입력 초기화
         definitionInput.value = "";
         imageInput.value = "";
         imagePreview.innerHTML = "";
@@ -244,9 +259,11 @@ saveBtn.addEventListener("click", async () => {
         addForm.style.display = "none";
 
         renderDefinitions(await loadEntries(word));
+
     } finally {
-        saveBtn.textContent = originalText;
+        // 버튼 복구
         saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
     }
 });
 
