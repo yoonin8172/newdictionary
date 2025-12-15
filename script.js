@@ -61,14 +61,12 @@ const homeBtn = document.getElementById("homeBtn");
 
 const imageInput = document.getElementById("imageInput");
 const clipBtn = document.querySelector(".attach-btn");
-
 const imagePreview = document.getElementById("imagePreview");
 
 /*************************************************
  * STATE
  *************************************************/
 let selectedImageFile = null;
-
 let currentSuggestions = [];
 let currentSuggestionIndex = -1;
 let originalInputValue = "";
@@ -156,12 +154,11 @@ async function showResultPage(word) {
     resultSection.style.display = "block";
 
     wordTitle.innerHTML = `
-  <span class="word-text">${word}</span>
-  <span class="word-stars">★★</span>
-`;
+        <span class="word-text">${word}</span>
+        <span class="word-stars">★★</span>
+    `;
 
     addForm.style.display = "none";
-
     suggestionList.innerHTML = "";
     suggestionList.style.display = "none";
     ghostText.textContent = "";
@@ -195,15 +192,11 @@ function renderDefinitions(entries) {
  * ADD FORM TOGGLE
  *************************************************/
 addBtn.addEventListener("click", () => {
-    const isOpen = addForm.style.display === "block";
-
-    if (isOpen) {
-        addForm.style.display = "none";
-        return;
+    addForm.style.display =
+        addForm.style.display === "block" ? "none" : "block";
+    if (addForm.style.display === "block") {
+        definitionInput.focus();
     }
-
-    addForm.style.display = "block";
-    definitionInput.focus();
 });
 
 /*************************************************
@@ -224,27 +217,37 @@ imageInput.addEventListener("change", () => {
 });
 
 /*************************************************
- * SAVE
+ * SAVE (저장 중 UX 추가)
  *************************************************/
 saveBtn.addEventListener("click", async () => {
     const text = definitionInput.value.trim();
-    const word = document.querySelector(".word-text").textContent; // ✅ 핵심 수정
+    const word = document.querySelector(".word-text").textContent;
 
     if (!text && !selectedImageFile) return;
+    if (saveBtn.disabled) return;
 
-    if (text) await addTextEntry(word, text);
-    if (selectedImageFile) {
-        await addImageEntry(word, selectedImageFile);
-        selectedImageFile = null;
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = "저장 중…";
+    saveBtn.disabled = true;
+
+    try {
+        if (text) await addTextEntry(word, text);
+        if (selectedImageFile) {
+            await addImageEntry(word, selectedImageFile);
+            selectedImageFile = null;
+        }
+
+        definitionInput.value = "";
+        imageInput.value = "";
+        imagePreview.innerHTML = "";
+        imagePreview.style.display = "none";
+        addForm.style.display = "none";
+
+        renderDefinitions(await loadEntries(word));
+    } finally {
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
     }
-
-    definitionInput.value = "";
-    imageInput.value = "";
-    imagePreview.innerHTML = "";
-    imagePreview.style.display = "none";
-    addForm.style.display = "none";
-
-    renderDefinitions(await loadEntries(word));
 });
 
 /*************************************************
@@ -271,7 +274,6 @@ function renderSuggestions(list) {
     list.forEach((word, index) => {
         const li = document.createElement("li");
         li.textContent = word;
-
         li.addEventListener("click", () => selectSuggestion(index));
         suggestionList.appendChild(li);
     });
@@ -288,16 +290,11 @@ function updateSuggestionHighlight() {
 
     if (currentSuggestionIndex >= 0) {
         const suggestion = currentSuggestions[currentSuggestionIndex];
-        const inputValue = originalInputValue;
-
         searchInput.classList.add("hide-text");
 
-        if (suggestion.startsWith(inputValue)) {
-            ghostText.textContent =
-                inputValue + suggestion.slice(inputValue.length);
-        } else {
-            ghostText.textContent = suggestion;
-        }
+        ghostText.textContent = suggestion.startsWith(originalInputValue)
+            ? originalInputValue + suggestion.slice(originalInputValue.length)
+            : suggestion;
     } else {
         ghostText.textContent = "";
         searchInput.classList.remove("hide-text");
@@ -308,7 +305,6 @@ function selectSuggestion(index) {
     searchInput.value = currentSuggestions[index];
     ghostText.textContent = "";
     searchInput.classList.remove("hide-text");
-
     suggestionList.innerHTML = "";
     suggestionList.style.display = "none";
     searchBtn.click();
@@ -328,22 +324,16 @@ searchInput.addEventListener("input", () => {
     currentSuggestionIndex = -1;
 
     if (searchInput.value.length !== 1) return;
-
     const list = demoSuggestions[searchInput.value];
-    if (!list) return;
-
-    renderSuggestions(list);
+    if (list) renderSuggestions(list);
 });
 
 searchInput.addEventListener("keydown", e => {
     if (e.key === "Enter") {
         e.preventDefault();
-
-        if (currentSuggestionIndex >= 0) {
-            selectSuggestion(currentSuggestionIndex);
-        } else {
-            searchBtn.click();
-        }
+        currentSuggestionIndex >= 0
+            ? selectSuggestion(currentSuggestionIndex)
+            : searchBtn.click();
         return;
     }
 
@@ -353,7 +343,6 @@ searchInput.addEventListener("keydown", e => {
             currentSuggestionIndex =
                 (currentSuggestionIndex + 1) % currentSuggestions.length;
             updateSuggestionHighlight();
-            return;
         }
 
         if (e.key === "ArrowUp") {
@@ -362,7 +351,6 @@ searchInput.addEventListener("keydown", e => {
                 (currentSuggestionIndex - 1 + currentSuggestions.length) %
                 currentSuggestions.length;
             updateSuggestionHighlight();
-            return;
         }
     }
 });
