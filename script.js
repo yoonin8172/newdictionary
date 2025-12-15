@@ -228,7 +228,7 @@ imageInput.addEventListener("change", () => {
  *************************************************/
 saveBtn.addEventListener("click", async () => {
     const text = definitionInput.value.trim();
-    const word = wordTitle.textContent;
+    const word = document.querySelector(".word-text").textContent; // ✅ 핵심 수정
 
     if (!text && !selectedImageFile) return;
 
