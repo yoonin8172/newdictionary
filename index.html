@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>사전</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- 오프닝 페이지 -->
+    <section id="home">
+        <h1>사전</h1>
+
+        <!-- 검색창 + 버튼을 한 줄로 -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="단어를 입력하세요" />
+            <button id="searchBtn" aria-label="검색">🔍</button>
+
+        </div>
+
+        <!-- 검색 상태 메시지 -->
+        <p id="searchStatus"></p>
+
+    </section>
+
+    <!-- 검색 결과 페이지 -->
+    <section id="result" style="display:none;">
+        <header>
+            <button id="homeBtn" aria-label="홈으로" title="홈으로">⌂</button>
+
+            <div class="title-block">
+                <h2 id="wordTitle"></h2>
+                <div class="meta">품사 · 발음</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- 좌측: 정의 리스트 -->
+            <div class="definitions" id="definitionList">
+                <!-- JS로 채워짐 -->
+            </div>
+
+            <!-- 우측: 정의 추가 -->
+            <div class="add-panel">
+                <button id="addBtn">정의 추가</button>
+
+                <div id="addForm" style="display:none;">
+                    <label>정의:</label>
+                    <textarea id="definitionInput"></textarea>
+
+                    <label>첨부:</label>
+                    <button class="clip">📎</button>
+
+                    <button id="saveBtn">저장</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,235 @@
+/* -------------------------
+   기본 리셋 & 서체
+------------------------- */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Arial, sans-serif;
+    color: #111;
+    background-color: #fff;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* -------------------------
+   오프닝 페이지
+------------------------- */
+
+#home {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+#home h1 {
+    font-size: 26px;
+    font-weight: 400;
+    /* Regular */
+    margin: 0 0 12px 0;
+}
+
+/* 검색 영역 */
+
+#searchInput {
+    width: 320px;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+}
+
+#searchBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    border: 1px solid #999;
+    background: #f5f5f5;
+}
+
+
+#searchBtn:active {
+    background-color: #e0e0e0;
+}
+
+.search-bar {
+    display: flex;
+    gap: 6px;
+}
+
+/* 검색 결과 없음 메시지 */
+
+#searchStatus {
+    min-height: 18px;
+    /* 항상 공간 확보 */
+    margin-top: 8px;
+    font-size: 13px;
+    color: #666;
+    visibility: hidden;
+    /* 안 보이지만 공간은 유지 */
+}
+
+
+.searching {
+    opacity: 0.5;
+}
+
+/* -------------------------
+   결과 페이지
+------------------------- */
+
+#result {
+    padding: 32px 40px;
+    /* 기존 24px 32px */
+}
+
+
+/* 상단 단어 영역 */
+
+#result header {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+#homeBtn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #aaa;
+    background: #f8f8f8;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}
+
+#homeBtn:active {
+    background: #e6e6e6;
+}
+
+.title-block {
+    display: flex;
+    flex-direction: column;
+}
+
+#wordTitle {
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0;
+}
+
+.meta {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* -------------------------
+   본문 레이아웃
+------------------------- */
+
+.content {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+
+    gap: 32px;
+}
+
+/* 좌측 정의 영역 */
+
+.definitions div {
+    font-size: 15px;
+    /* 기존 14px → 15px */
+    line-height: 1.8;
+    /* 읽기 전용 문서 느낌 */
+    margin-bottom: 14px;
+}
+
+
+/* 우측 정의 추가 패널 */
+
+.add-panel {
+    border-left: 1px solid #ddd;
+    padding-left: 24px;
+    /* 기존 16px → 24px */
+    padding-top: 8px;
+}
+
+
+#addBtn {
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid #aaa;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+#addBtn:active {
+    background-color: #e6e6e6;
+}
+
+/* 정의 추가 폼 */
+
+#addForm {
+    margin-top: 16px;
+}
+
+#addForm label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+#definitionInput {
+    width: 100%;
+    height: 110px;
+    padding: 6px;
+    font-size: 13px;
+    border: 1px solid #ccc;
+    margin-bottom: 8px;
+}
+
+.clip {
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    background-color: #fafafa;
+    cursor: default;
+    margin-right: 6px;
+}
+
+#saveBtn {
+    margin-top: 8px;
+    font-size: 12px;
+    padding: 6px 10px;
+    border: 1px solid #888;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+#saveBtn:active {
+    background-color: #ddd;
+}
+
+
+/* 정의 번호 */
+
+.index {
+    display: inline-block;
+    width: 18px;
+    /* 숫자 영역 고정 */
+    margin-right: 6px;
+    font-size: 11px;
+    /* 본문보다 작게 */
+    color: #999;
+    /* 연한 회색 */
+    text-align: right;
+    vertical-align: top;
+}
